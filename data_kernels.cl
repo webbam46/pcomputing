@@ -13,11 +13,44 @@ __kernel void hist(__global const int * data,__global int * hist,int nr_bins){
 	barrier(CLK_GLOBAL_MEM_FENCE);
 
 	//Set bin index
-	int bin_index = A[id];
+	int bin_index = data[id];
 
 	//Use bin_index to increment histogram value
 	atomic_inc(&H[bin_index]);
+
 }
+
+//Compute max using atomic functions
+__kernel void atomicmax(__global const int * data,__global int * result){
+	//Get the global id
+	int id = get_global_id(0);
+	
+	//Sync
+	barrier(CLK_GLOBAL_MEM_FENCE);
+	
+	//Set index
+	int index = data[id];
+	
+	//Calculate result using atmoic func atomic_max
+	atomic_max(&result[index]);
+}
+
+//Compute min using atomic functions
+__kernel void atomicmax(__global const int * data,__global int * result){
+	//Get the global id
+	int id = get_global_id(0);
+	
+	//Sync
+	barrier(CLK_GLOBAL_MEM_FENCE);
+	
+	//Set index
+	int index = data[id];
+	
+	//Calculate result using atomic func atomic_min
+	atomic_min(&result[index]);
+}
+
+
 
 //Compute the sum of the given data
 __kernel void sum(__global const int * data,__global int * out,__local int * buffer){
@@ -86,6 +119,21 @@ __kernel void max(__global const int * data,__global int * out,__local int * buf
 	//Now copy from the buffer - to the output array
 	out[id] = buffer[id];
 
+}
+
+//Compute the average of the given data
+__kernel void average(__global const int * data,__global int * out,__local int * buffer){
+	int id = get_global_id(0); //Global ID
+	int local_id = get_local_id(0); //Local ID
+	int local_size = get_local_size(0); //Local size
+	
+	//Copy to buffer
+	buffer[local_id] = data[id];
+	
+	//Sync
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
+	
 }
 
 
